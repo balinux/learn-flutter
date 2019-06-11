@@ -1,39 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
 
 void main() {
   runApp(new MaterialApp(
-    home: new Home(),
-    title: "Balinux Application",
-    ));
+    home: Home(),
+    debugShowCheckedModeBanner: false,
+    title: "Learn ListView",
+  ));
 }
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => new _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  List dataJson;
+  Future<String> getData() async {
+    http.Response results = await http.get(
+        Uri.encodeFull('https://jsonplaceholder.typicode.com/posts'),
+        headers: {"Accept": "application/json"});
+
+    this.setState(() {
+      dataJson = json.decode(results.body);
+    });
+  }
+
+  @override
+  void initState() {
+    this.getData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(
-          backgroundColor: Colors.red[800],
-          leading: new Icon(Icons.home),
-          title:new Center(
-            child: new Text("Home Dashboard"),
-          ),
-          actions: <Widget>[
-            new Icon(Icons.search)
-          ],
-        ),
-        body: new Center(
-          child: new Container(
-            color: Colors.blue[900],
-            width: 200.0,
-            height: 100.0,
-            child: new Center(
-              child: new Text(
-                "Button ",
-                style: new TextStyle(
-                    color: Colors.white, fontFamily: "Serif", fontSize: 20.0),
-              ),
-            ),
-          ),
-    ));
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Icon(Icons.home),
+        backgroundColor: Colors.orange,
+      ),
+      body: new ListView.builder(
+        itemCount: dataJson == null ? 0 : dataJson.length,
+        itemBuilder: (context, i) {
+          return new Container(
+            padding: new EdgeInsets.all(10.0),
+            child: new Card(
+                child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                new Text(
+                  dataJson[i]['title'],
+                  style:
+                      new TextStyle(fontSize: 20.0, color: Colors.blueAccent),
+                ),
+                new Text(
+                  dataJson[i]['body'],
+                )
+              ],
+            )),
+          );
+        },
+      ),
+    );
   }
 }
